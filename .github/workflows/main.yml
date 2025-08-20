@@ -1,0 +1,94 @@
+name: Nodejs
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+  schedule:
+    - cron: "0 * * * *" # Executa a cada hora
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      # - name: Ler, contador e salvar
+      #   id: contador
+      #   run: |
+      #     if [ ! -f contador.txt ]; then
+      #       echo "0" > contador.txt
+      #     fi
+      #     valor=$(cat contador.txt)
+      #     novo=$((valor + 1))
+      #     echo "$novo" > contador.txt
+      #     echo "contador=$novo" >> $GITHUB_OUTPUT
+
+      # - name: Sleep antes de executar node (contador em minutos)
+      #   run: |
+      #     contador=${{ steps.contador.outputs.contador }}
+      #     delay_segundos=$((contador * 60))
+      #     echo "Aguarde $contador minutos..."
+      #     sleep $delay_segundos
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Instalar dependências do sistema
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            wget \
+            gnupg \
+            ca-certificates \
+            apt-transport-https \
+            xvfb \
+            && sudo rm -rf /var/lib/apt/lists/*
+
+      - name: Instalar Google Chrome
+        run: |
+          wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add - \
+          && echo "deb [arch=amd64] https://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google.list \
+          && sudo apt-get update \
+          && sudo apt-get install -y google-chrome-stable \
+          && sudo rm -rf /var/lib/apt/lists/*
+
+      - name: Instalar dependências do Node.js
+        run: npm update && npm install
+
+      - name: Cookies
+        env:
+          COOKIES: ${{ secrets.COOKIES }}
+        run: echo "$COOKIES" > cookies.json
+
+      - name: Executar node index.js
+        env:
+          URL: ${{ secrets.URL }}
+          LOGIN: ${{ secrets.LOGIN }}
+          SENHA: ${{ secrets.SENHA }}
+        run: xvfb-run --auto-servernum -- node --trace-warnings free.js
+
+      - name: Atualiza screen.png
+        env:
+          SENHA_PDF: ${{ secrets.SENHA_PDF }}
+        run: |
+          sudo apt-get update && sudo apt-get install -y img2pdf qpdf
+          img2pdf screen.png -o temp.pdf && qpdf --encrypt $SENHA_PDF $SENHA_PDF 256 -- temp.pdf screen.pdf && rm temp.pdf
+          git config --global user.name "github-actions"
+          git config --global user.email "actions@github.com"
+          git add screen.pdf || echo "Nada para adicionar"
+          git commit -m "Atualiza screen.pdf" || echo "Nada para commitar"
+          git push --quiet || echo "Falha no push, provavelmente conflito"
+
+      # - name: Fazer upload da captura de tela
+      #   if: success() || failure()
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: screenshot
+      #     path: screen.png

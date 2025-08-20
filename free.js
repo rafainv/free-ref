@@ -2,8 +2,8 @@ const { connect } = require("puppeteer-real-browser");
 const fs = require("fs");
 
 const url = process.env.URL;
-// const login = process.env.LOGIN;
-// const senha = process.env.SENHA;
+const login = process.env.LOGIN;
+const senha = process.env.SENHA;
 
 const COOKIES_PATH = "cookies.json";
 

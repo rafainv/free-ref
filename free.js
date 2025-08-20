@@ -47,19 +47,19 @@ const free = async () => {
     await new Promise((r) => setTimeout(r, 10000));
 
     if ((await page.content()).includes("LOGIN")) {
-      await new Promise((r) => setTimeout(r, 5000));
-      await page.waitForSelector("li.login_menu_button");
-      await page.click("li.login_menu_button");
-      await page.waitForSelector('input[name="btc_address"]');
-      await page.type('input[name="btc_address"]', login);
-      await page.waitForSelector("#login_form_password");
-      await page.type("#login_form_password", senha);
-      await page.waitForSelector("#login_button");
-      await page.click("#login_button");
-      await page.waitForNavigation({ waitUntil: "networkidle2" });
-      await new Promise((r) => setTimeout(r, 5000));
-      const cookies = await page.cookies();
-      fs.writeFileSync(COOKIES_PATH, JSON.stringify(cookies, null, 2));
+      // await new Promise((r) => setTimeout(r, 5000));
+      // await page.waitForSelector("li.login_menu_button");
+      // await page.click("li.login_menu_button");
+      // await page.waitForSelector('input[name="btc_address"]');
+      // await page.type('input[name="btc_address"]', login);
+      // await page.waitForSelector("#login_form_password");
+      // await page.type("#login_form_password", senha);
+      // await page.waitForSelector("#login_button");
+      // await page.click("#login_button");
+      // await page.waitForNavigation({ waitUntil: "networkidle2" });
+      // await new Promise((r) => setTimeout(r, 5000));
+      // const cookies = await page.cookies();
+      // fs.writeFileSync(COOKIES_PATH, JSON.stringify(cookies, null, 2));
       console.log("Cookies salvos!");
     } else {
       console.log("Já está logado.");
